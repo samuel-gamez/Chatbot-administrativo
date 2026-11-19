@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel de asesores</title>
+<link rel="stylesheet" href="/static/estilos.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="marca">Admisiones <small>Panel de asesores</small></div>
+    <nav class="tabs">
+      <button class="tab activo" data-vista="chats">Chats</button>
+      <button class="tab" data-vista="prueba">Probar bot</button>
+      <button class="tab" data-vista="conocimiento">Información del bot</button>
+      <button class="tab" data-vista="asesores" id="tab-asesores" hidden>Asesores</button>
+      <button class="tab" data-vista="cuenta">Mi cuenta</button>
+    </nav>
+    <div class="espacio"></div>
+    <button class="turno" id="turno" title="Activa esto cuando empieces tu turno para recibir alertas">
+      <span class="switch"></span><span id="turno-texto">Fuera de turno</span>
+    </button>
+    <div class="usuario"><span class="nombre-usuario" id="yo-nombre"></span><button id="salir">Salir</button></div>
+  </header>
+
+  <!-- CHATS -->
+  <section class="vista activa" id="vista-chats">
+    <aside class="lista">
+      <div class="lista-cab"><input class="buscador" id="buscar" placeholder="Buscar por nombre o número"></div>
+      <div class="filtros" id="filtros">
+        <button class="chip activo" data-f="todas">Todas</button>
+        <button class="chip" data-f="pendientes">Necesitan asesor <span class="n" id="n-pend"></span></button>
+        <button class="chip" data-f="mias">Mis chats <span class="n" id="n-mias"></span></button>
+        <button class="chip" data-f="humano">Con asesor</button>
+        <button class="chip" data-f="bot">Con IA</button>
+      </div>
+      <div class="items" id="items"></div>
+    </aside>
+    <section class="chat" id="chat">
+      <div class="sin-chat" id="sin-chat">
+        <div><b>Selecciona un chat</b>Los chats que la IA marque como "necesita asesor" aparecen primero.</div>
+      </div>
+    </section>
+  </section>
+
+  <!-- PROBAR -->
+  <section class="vista pagina" id="vista-prueba">
+    <div class="pagina-inner">
+      <h2>Probar el bot</h2>
+      <p class="sub">Escribe como si fueras un aspirante. Es una conversación de prueba: no sale por WhatsApp, pero aparece en la bandeja marcada como <span class="badge prueba">Prueba</span>, así puedes ensayar también cómo se toma un chat.</p>
+      <div class="telefono">
+        <div class="telefono-cab"><span>Admisiones · WhatsApp</span><button id="sim-reiniciar">Nueva conversación</button></div>
+        <div class="mensajes" id="sim-mensajes"></div>
+        <div>
+          <div class="escribiendo" id="sim-escribiendo"></div>
+          <form class="compositor" id="sim-form">
+            <textarea id="sim-texto" rows="1" placeholder="Escribe un mensaje"></textarea>
+            <button class="btn primario">Enviar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONOCIMIENTO -->
+  <section class="vista pagina" id="vista-conocimiento">
+    <div class="pagina-inner">
+      <h2>Información del bot</h2>
+      <p class="sub">Esto es todo lo que la IA sabe: programas, costos, fechas, requisitos y contactos. Lo que no esté aquí no lo inventa: pasa el chat a un asesor. Los cambios aplican de inmediato.</p>
+      <div class="tarjeta">
+        <textarea class="editor" id="conocimiento" spellcheck="false"></textarea>
+        <div class="fila">
+          <button class="btn primario" id="guardar-conocimiento">Guardar cambios</button>
+          <button class="btn" id="probar-ia" type="button">Probar conexión con la IA</button>
+          <button class="btn" id="cargar-archivo" type="button" title="Reemplaza el texto por el del archivo conocimiento/universidad.md de la carpeta del bot">Cargar desde archivo</button>
+          <span class="estado-guardado" id="estado-conocimiento"></span>
+        </div>
+        <div class="aviso" id="resultado-ia" style="margin-top:12px"></div>
+      </div>
+      <div class="tarjeta" style="margin-top:18px">
+        <h3 style="margin:0 0 4px;color:var(--morado)">Mensaje de presentación del asesor</h3>
+        <p class="sub" style="margin:0 0 10px">Aparece listo para enviar cuando un asesor toma un chat; el asesor puede editarlo antes de enviarlo.
+          Usa <b>{asesor}</b> para el nombre del asesor y <b>{aspirante}</b> para el nombre del aspirante.</p>
+        <textarea class="editor" id="presentacion" style="min-height:90px" spellcheck="true"></textarea>
+        <div class="fila">
+          <button class="btn primario" id="guardar-presentacion">Guardar mensaje</button>
+          <span class="estado-guardado" id="estado-presentacion"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ASESORES -->
+  <section class="vista pagina" id="vista-asesores">
+    <div class="pagina-inner">
+      <h2>Asesores</h2>
+      <p class="sub">Aprueba a los asesores que se registran en <b id="url-registro"></b> y desactiva a quienes ya no trabajen en admisiones.</p>
+      <div class="aviso ok" id="aviso-clave" style="display:none"></div>
+      <div class="tarjeta"><table>
+        <thead><tr><th>Nombre</th><th>Correo</th><th>Estado</th><th>Rol</th><th></th></tr></thead>
+        <tbody id="tabla-asesores"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- MI CUENTA -->
+  <section class="vista pagina" id="vista-cuenta">
+    <div class="pagina-inner" style="max-width:460px">
+      <h2>Mi cuenta</h2>
+      <p class="sub" id="cuenta-datos"></p>
+      <form class="tarjeta" id="form-clave">
+        <div class="campo"><label for="clave-actual">Contraseña actual</label><input id="clave-actual" type="password" autocomplete="current-password" required></div>
+        <div class="campo"><label for="clave-nueva">Nueva contraseña (mínimo 8 caracteres)</label><input id="clave-nueva" type="password" autocomplete="new-password" minlength="8" required></div>
+        <button class="btn primario">Cambiar contraseña</button>
+      </form>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+<script src="/static/clave.js"></script>
+<script src="/static/panel.js"></script>
+</body>
+</html>
